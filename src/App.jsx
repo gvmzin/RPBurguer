@@ -72,20 +72,38 @@ function App() {
             <div className="logo">
               <img src="/logorpburguer.png" alt="RPBurguer" style={{ height: '100px', width: 'auto' }} />
             </div>
-            <div className="status-badge">
-              <span className={`dot ${isOpen ? 'open' : 'closed'}`}></span>
-              <span className="status-text">
-                {isOpen ? 'Aberto Agora' : (() => {
-                  const now = new Date();
-                  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                  const brazilTime = new Date(utc + (3600000 * -3));
-                  const day = brazilTime.getDay();
+            <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
+              <a href="#" onClick={() => setIsMenuOpen(false)}>Início</a>
+              <a href="#menu" onClick={() => setIsMenuOpen(false)}>Cardápio</a>
+              <a href="https://wa.me/5571983578408" target="_blank" rel="noreferrer" onClick={() => setIsMenuOpen(false)}>Contato</a>
+            </div>
+            <div className="nav-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div className="status-badge">
+                <span className={`dot ${isOpen ? 'open' : 'closed'}`}></span>
+                <span className="status-text">
+                  {isOpen ? 'Aberto Agora' : (() => {
+                    const now = new Date();
+                    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    const brazilTime = new Date(utc + (3600000 * -3));
+                    const day = brazilTime.getDay();
 
-                  if (day === 0) return 'Fechado (Abre Segunda)';
-                  if (day === 6) return 'Fechado (Abre às 17h)';
-                  return 'Fechado (Abre às 16h)';
-                })()}
-              </span>
+                    if (day === 0) return 'Fechado (Abre Segunda)';
+                    if (day === 6) return 'Fechado (Abre às 17h)';
+                    return 'Fechado (Abre às 16h)';
+                  })()}
+                </span>
+              </div>
+              <button
+                className="menu-toggle"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                style={{ display: 'none', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
+              >
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
             </div>
           </nav>
         </div>
@@ -96,7 +114,7 @@ function App() {
           <div className="container flex-center" style={{ gap: '2rem', width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
             <div className="hero-content">
               <h1>O <span>Smash</span> Que Você <span>R</span>es<span>P</span>eita</h1>
-              <p style={{ marginBottom: '2rem', maxWidth: '500px' }}>
+              <p style={{ marginBottom: '2rem', maxWidth: '500px', marginInline: 'auto' }}>
                 Carne fresca, queijo derretendo e aquele sabor defumado que só a RPBurguer tem.
                 Entregamos quentinho na sua porta.
               </p>
