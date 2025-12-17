@@ -81,7 +81,7 @@ function App() {
             <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
               <a href="#" onClick={() => setIsMenuOpen(false)}>Início</a>
               <a href="#menu" onClick={() => setIsMenuOpen(false)}>Cardápio</a>
-              <a href="https://wa.me/5571983578408" target="_blank" rel="noreferrer" onClick={() => setIsMenuOpen(false)}>Contato</a>
+              <a href="#contact" onClick={() => setIsMenuOpen(false)}>Contato</a>
             </div>
             <div className="nav-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div className="status-badge">
@@ -286,6 +286,93 @@ function App() {
                     <span className="menu-item-name">Água 500ml</span>
                     <span className="menu-item-price">R$ 2,00</span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact & Social Section */}
+        <section id='contact' style={{ padding: '4rem 0 6rem', background: 'var(--color-surface)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          {/* Background decoration */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.3), transparent)'
+          }}></div>
+
+          <div className="container">
+            <div className="reveal">
+              <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+                <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Gostou? Peça Agora!</h2>
+                <p style={{ fontSize: '1.1rem', color: 'var(--color-text-muted)', marginBottom: '2rem', lineHeight: '1.6' }}>
+                  Para garantir um atendimento ágil e personalizado, todos os nossos pedidos são realizados
+                  <strong style={{ color: 'var(--color-primary)', display: 'block', fontSize: '1.3rem', marginTop: '0.5rem' }}>exclusivamente pelo WhatsApp</strong>
+                </p>
+
+                <a
+                  href="https://wa.me/5571983578408?text=Ol%C3%A1!%20Vi%20o%20card%C3%A1pio%20no%20site%20e%20gostaria%20de%20fazer%20um%20pedido."
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-primary"
+                  style={{
+                    marginBottom: '4rem',
+                    padding: '1.2rem 3rem',
+                    fontSize: '1.2rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}
+                >
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
+                    <path d="M17.472 14.382C17.112 14.175 16.035 14.175 15.828 14.382C15.621 14.589 15.071 15.424 14.863 15.631C14.656 15.838 14.242 16.046 13.621 15.631C13.001 15.217 12.189 14.542 11.238 13.593C10.288 12.643 9.613 11.832 9.199 11.211C8.784 10.59 8.992 10.176 9.199 9.968C9.406 9.761 10.241 9.212 10.448 9.004C10.655 8.797 10.655 8.59 10.448 8.23C10.241 7.87 9.199 5.798 8.992 5.034C8.784 4.27 8.163 4.27 7.749 4.27C7.334 4.27 6.713 4.477 6.092 5.099C5.471 5.72 5.056 7.172 5.056 9.245C5.056 11.318 6.505 13.805 7.127 14.634C7.749 15.463 10.448 19.403 14.802 20.854C19.155 22.305 19.362 21.061 19.776 20.647C20.191 20.233 21.434 19.403 21.641 18.367C21.848 17.33 21.641 17.025 21.226 16.818L17.472 14.382Z" />
+                  </svg>
+                  Fazer Pedido Agora
+                </a>
+
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  padding: '2rem',
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)'
+                }}>
+                  <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Acompanhe no Instagram</h3>
+                  <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+                    Fique por dentro das novidades, bastidores e promoções relâmpago!
+                  </p>
+
+                  <a
+                    href="https://www.instagram.com/rpburgeroficial/"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                      color: 'white',
+                      fontWeight: '600',
+                      padding: '0.75rem 2rem',
+                      borderRadius: 'var(--radius-full)',
+                      boxShadow: '0 4px 15px rgba(220, 39, 67, 0.3)',
+                      transition: 'transform 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                    Seguir @rpburgeroficial
+                  </a>
                 </div>
               </div>
             </div>
