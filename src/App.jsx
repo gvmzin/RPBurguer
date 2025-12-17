@@ -1,80 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const carouselRef = useRef(null);
-  const intervalRef = useRef(null);
 
-  const burgers = [
-    {
-      name: 'RPCLASSICO',
-      price: 'R$ 18,00',
-      desc: 'Pão de batata, carne fraldinha, queijo cheddar, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.',
-      img: '/RP_CLASSICO.png'
-    },
-    {
-      name: 'RPBURGER',
-      price: 'R$ 22,00',
-      desc: 'Pão de batata, carne fraldinha, queijo cheddar, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.',
-      img: '/PRBURGUER.png'
-    },
-    {
-      name: 'DUPLA IGNORÂNCIA',
-      price: 'R$ 31,00',
-      desc: 'Pão de batata, 2 carne fraldinha, 2 queijo cheddar, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.',
-      img: '/DUPLAIGNORANCIA.png'
-    }
-  ];
 
-  const resetAutoPlay = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
-      scrollCarousel('right');
-    }, 5000); // 5 seconds
-  };
 
-  const scrollCarousel = (direction) => {
-    resetAutoPlay(); // Reset timer on interaction
 
-    if (carouselRef.current) {
-      const { current } = carouselRef;
-      const width = current.clientWidth;
 
-      if (direction === 'left') {
-        // If at start, jump to end
-        if (current.scrollLeft === 0) {
-          current.scrollTo({ left: current.scrollWidth, behavior: 'smooth' });
-        } else {
-          current.scrollBy({ left: -width, behavior: 'smooth' });
-        }
-      } else {
-        // If at end, jump to start
-        // Using a small threshold (10px) to handle potential rounding errors
-        if (current.scrollLeft + width >= current.scrollWidth - 10) {
-          current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          current.scrollBy({ left: width, behavior: 'smooth' });
-        }
-      }
-    }
-  };
-
-  const jumpToSlide = (index) => {
-    resetAutoPlay(); // Reset timer on interaction
-    if (carouselRef.current) {
-      const width = carouselRef.current.clientWidth;
-      carouselRef.current.scrollTo({ left: width * index, behavior: 'smooth' });
-    }
-  };
-
-  // Auto-play infinite carousel
-  useEffect(() => {
-    resetAutoPlay(); // Start timer
-    return () => clearInterval(intervalRef.current);
-  }, []);
 
   // Status Check Logic
   useEffect(() => {
@@ -135,35 +69,14 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Carousel Animation Logic
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('carousel-active');
-          const index = Number(entry.target.getAttribute('data-index'));
-          if (!isNaN(index)) setCurrentSlide(index);
-        } else {
-          entry.target.classList.remove('carousel-active');
-        }
-      });
-    }, {
-      root: carouselRef.current,
-      threshold: 0.5 // Trigger when 50% visible
-    });
 
-    const items = document.querySelectorAll('.carousel-item');
-    items.forEach(item => observer.observe(item));
-
-    return () => observer.disconnect();
-  }, []);
   return (
     <>
       <header className={isScrolled ? 'scrolled' : ''}>
         <div className="container">
           <nav>
             <div className="logo">
-              <img src="/logorpburguer.png" alt="RPBurguer" style={{ height: '100px', width: 'auto' }} />
+              <img src="/logorpburguer.png" alt="RPBurguer" style={{ height: '100px', width: '100px', transform: 'translateY(-8px)' }} />
             </div>
             <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
               <a href="#" onClick={() => setIsMenuOpen(false)}>Início</a>
@@ -191,11 +104,11 @@ function App() {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
               >
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="3" y1="12" x2="21" y2="12"></line>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
+                <div className={`custom-burger ${isMenuOpen ? 'open' : ''}`}>
+                  <span className="bun-top"></span>
+                  <span className="meat"></span>
+                  <span className="bun-bottom"></span>
+                </div>
               </button>
             </div>
           </nav>
@@ -206,10 +119,20 @@ function App() {
         <section className="hero">
           <div className="container flex-center" style={{ gap: '2rem', width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
             <div className="hero-content">
+              <div className="reveal" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                <span className="status-badge" style={{
+                  backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                  border: '1px solid rgba(255, 107, 53, 0.2)',
+                  color: '#ff6b35'
+                }}>
+                  Entrega Disponível via WhatsApp
+                </span>
+              </div>
               <h1>O <span>Smash</span> Que Você <span>R</span>es<span>P</span>eita</h1>
               <p style={{ marginBottom: '2rem', maxWidth: '500px', marginInline: 'auto' }}>
                 Carne fresca, queijo derretendo e aquele sabor defumado que só a RPBurguer tem.
-                Entregamos quentinho na sua porta.
+                <br />
+                <span style={{ color: '#ff6b35', fontWeight: 'bold' }}>Levamos até você!</span> Faça seu pedido.
               </p>
 
               <a
@@ -234,40 +157,43 @@ function App() {
         <section className="features" id="menu">
           <div className="container">
             <div className="section-header reveal">
-              <h2>Linha Gourmet (Artesanal)</h2>
+              <h2>Linha Artesanal</h2>
               <p>Sabor inigualável e ingredientes selecionados</p>
             </div>
 
-            {/* Added 'reveal' to wrapper to animate the whole block entering */}
-            <div className="carousel-wrapper reveal">
-              <div className="carousel" ref={carouselRef}>
-                {burgers.map((burger, index) => (
-                  <div className="card carousel-item" key={index} data-index={index}>
-                    <img src={burger.img} alt={burger.name} className="card-image" />
-                    <h3>{burger.name}</h3>
-                    <p>{burger.desc}</p>
-                    <span className="price">{burger.price}</span>
-                  </div>
-                ))}
+            <div className="grid">
+              <div className="card reveal">
+                <img src="/RP_CLASSICO.png" alt="RPCLASSICO" className="card-image" />
+                <h3>RPCLASSICO</h3>
+                <p>Pão de batata, carne fraldinha, queijo cheddar, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
+                <br />
+                <span className="price">R$ 18,00</span>
               </div>
-
-              <div className="carousel-controls reveal">
-                <button className="carousel-btn" onClick={() => scrollCarousel('left')}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                </button>
-                <button className="carousel-btn" onClick={() => scrollCarousel('right')}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                </button>
+              <div className="card reveal" style={{ position: 'relative', border: '1px solid var(--color-primary)' }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  right: '20px',
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'white',
+                  padding: '4px 12px',
+                  borderRadius: '12px',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 10px rgba(255, 107, 53, 0.4)'
+                }}>
+                  Mais Pedido
+                </div>
+                <img src="/PRBURGUER.png" alt="RPBURGER" className="card-image" />
+                <h3>RPBURGER</h3>
+                <p>Pão de batata, carne fraldinha, queijo cheddar, <span className="diff">cebola caramelizada</span>, <span className="diff">bacon</span>, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
+                <span className="price">R$ 22,00</span>
               </div>
-
-              <div className="indicadores-servicos">
-                {burgers.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`ponto-indicador ${i === currentSlide ? 'ativo' : ''}`}
-                    onClick={() => jumpToSlide(i)}
-                  />
-                ))}
+              <div className="card reveal">
+                <img src="/DUPLAIGNORANCIA.png" alt="DUPLA IGNORÂNCIA" className="card-image" />
+                <h3>DUPLA IGNORÂNCIA</h3>
+                <p>Pão de batata, <span className='diff'>2x carne fraldinha</span>, <span className='diff'>2x queijo cheddar</span>, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
+                <span className="price">R$ 31,00</span>
               </div>
             </div>
 
@@ -327,7 +253,7 @@ function App() {
                 </div>
                 <div className="menu-item">
                   <div className="menu-item-header">
-                    <span className="menu-item-name">Batata 200g Prime</span>
+                    <span className="menu-item-name">Batata 200g</span>
                     <span className="menu-item-price">R$ 15,00</span>
                   </div>
                   <p className="menu-item-desc">Acompanhada de Cheddar & Bacon</p>
@@ -367,6 +293,19 @@ function App() {
         </section>
 
         <footer style={{ textAlign: 'center', padding: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', color: 'var(--color-text-muted)' }}>
+          <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', marginBottom: '0.25rem' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span style={{ fontWeight: 'bold', letterSpacing: '0.5px' }}>ONDE ESTAMOS</span>
+            </div>
+            <p style={{ color: 'var(--color-text-main)', fontSize: '1.1rem', margin: 0 }}>Avenida Edgard Santos</p>
+            <p style={{ fontSize: '0.9rem', maxWidth: '400px', margin: 0, opacity: 0.8 }}>
+              Em frente ao condomínio Bosque da Lagoa, próximo ao Bora Bora
+            </p>
+          </div>
           <div style={{ marginBottom: '1.5rem' }}>
             <a
               href="https://www.instagram.com/rpburgeroficial/"
