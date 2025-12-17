@@ -1,9 +1,80 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const carouselRef = useRef(null);
+  const intervalRef = useRef(null);
+
+  const burgers = [
+    {
+      name: 'RPCLASSICO',
+      price: 'R$ 18,00',
+      desc: 'Pão de batata, carne fraldinha, queijo cheddar, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.',
+      img: '/RP_CLASSICO.png'
+    },
+    {
+      name: 'RPBURGER',
+      price: 'R$ 22,00',
+      desc: 'Pão de batata, carne fraldinha, queijo cheddar, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.',
+      img: '/PRBURGUER.png'
+    },
+    {
+      name: 'DUPLA IGNORÂNCIA',
+      price: 'R$ 31,00',
+      desc: 'Pão de batata, 2 carne fraldinha, 2 queijo cheddar, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.',
+      img: '/DUPLAIGNORANCIA.png'
+    }
+  ];
+
+  const resetAutoPlay = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      scrollCarousel('right');
+    }, 5000); // 5 seconds
+  };
+
+  const scrollCarousel = (direction) => {
+    resetAutoPlay(); // Reset timer on interaction
+
+    if (carouselRef.current) {
+      const { current } = carouselRef;
+      const width = current.clientWidth;
+
+      if (direction === 'left') {
+        // If at start, jump to end
+        if (current.scrollLeft === 0) {
+          current.scrollTo({ left: current.scrollWidth, behavior: 'smooth' });
+        } else {
+          current.scrollBy({ left: -width, behavior: 'smooth' });
+        }
+      } else {
+        // If at end, jump to start
+        // Using a small threshold (10px) to handle potential rounding errors
+        if (current.scrollLeft + width >= current.scrollWidth - 10) {
+          current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          current.scrollBy({ left: width, behavior: 'smooth' });
+        }
+      }
+    }
+  };
+
+  const jumpToSlide = (index) => {
+    resetAutoPlay(); // Reset timer on interaction
+    if (carouselRef.current) {
+      const width = carouselRef.current.clientWidth;
+      carouselRef.current.scrollTo({ left: width * index, behavior: 'smooth' });
+    }
+  };
+
+  // Auto-play infinite carousel
+  useEffect(() => {
+    resetAutoPlay(); // Start timer
+    return () => clearInterval(intervalRef.current);
+  }, []);
 
   // Status Check Logic
   useEffect(() => {
@@ -64,6 +135,28 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Carousel Animation Logic
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('carousel-active');
+          const index = Number(entry.target.getAttribute('data-index'));
+          if (!isNaN(index)) setCurrentSlide(index);
+        } else {
+          entry.target.classList.remove('carousel-active');
+        }
+      });
+    }, {
+      root: carouselRef.current,
+      threshold: 0.5 // Trigger when 50% visible
+    });
+
+    const items = document.querySelectorAll('.carousel-item');
+    items.forEach(item => observer.observe(item));
+
+    return () => observer.disconnect();
+  }, []);
   return (
     <>
       <header className={isScrolled ? 'scrolled' : ''}>
@@ -96,7 +189,7 @@ function App() {
               <button
                 className="menu-toggle"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                style={{ display: 'none', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
               >
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -138,28 +231,136 @@ function App() {
           </div>
         </section>
 
-        <section className="features">
+        <section className="features" id="menu">
           <div className="container">
             <div className="section-header reveal">
               <h2>Linha Gourmet (Artesanal)</h2>
               <p>Sabor inigualável e ingredientes selecionados</p>
             </div>
 
+            {/* Added 'reveal' to wrapper to animate the whole block entering */}
+            <div className="carousel-wrapper reveal">
+              <div className="carousel" ref={carouselRef}>
+                {burgers.map((burger, index) => (
+                  <div className="card carousel-item" key={index} data-index={index}>
+                    <img src={burger.img} alt={burger.name} className="card-image" />
+                    <h3>{burger.name}</h3>
+                    <p>{burger.desc}</p>
+                    <span className="price">{burger.price}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="carousel-controls reveal">
+                <button className="carousel-btn" onClick={() => scrollCarousel('left')}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                </button>
+                <button className="carousel-btn" onClick={() => scrollCarousel('right')}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                </button>
+              </div>
+
+              <div className="indicadores-servicos">
+                {burgers.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`ponto-indicador ${i === currentSlide ? 'ativo' : ''}`}
+                    onClick={() => jumpToSlide(i)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="section-header reveal" style={{ marginTop: '6rem' }}>
+              <h2>Cardápio Completo</h2>
+              <p>Confira outras delícias da nossa casa</p>
+            </div>
+
             <div className="grid">
-              <div className="card reveal">
-                <h3>RPCLASSICO</h3>
-                <p>Pão de batata, carne fraldinha, queijo cheddar, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
-                <span className="price">R$ 18,00</span>
+              {/* Lanches */}
+              <div className="card reveal menu-category">
+                <h3>Lanches Tradicionais</h3>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">MISTO</span>
+                    <span className="menu-item-price">R$ 6,00</span>
+                  </div>
+                  <p className="menu-item-desc">Pão, queijo, presunto, ketchup, mostarda, maionese.</p>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">HAMBURGUER</span>
+                    <span className="menu-item-price">R$ 8,00</span>
+                  </div>
+                  <p className="menu-item-desc">Pão, carne de hambúrguer, alface, tomate, ketchup, mostarda, maionese.</p>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">MISBURGUER</span>
+                    <span className="menu-item-price">R$ 12,00</span>
+                  </div>
+                  <p className="menu-item-desc">Pão, carne de hambúrguer, queijo, presunto, alface, tomate, ketchup, mostarda, maionese.</p>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">MISBACON</span>
+                    <span className="menu-item-price">R$ 16,00</span>
+                  </div>
+                  <p className="menu-item-desc">Pão, carne de hambúrguer, queijo, presunto, bacon, alface, tomate, ketchup, mostarda, maionese.</p>
+                </div>
               </div>
-              <div className="card reveal">
-                <h3>RPBURGER</h3>
-                <p>Pão de batata, carne fraldinha, queijo cheddar, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
-                <span className="price">R$ 22,00</span>
+
+              {/* Batata Frita */}
+              <div className="card reveal menu-category">
+                <h3>Batata Frita</h3>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">Batata 100g</span>
+                    <span className="menu-item-price">R$ 7,00</span>
+                  </div>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">Batata 200g</span>
+                    <span className="menu-item-price">R$ 10,00</span>
+                  </div>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">Batata 200g Prime</span>
+                    <span className="menu-item-price">R$ 15,00</span>
+                  </div>
+                  <p className="menu-item-desc">Acompanhada de Cheddar & Bacon</p>
+                </div>
               </div>
-              <div className="card reveal">
-                <h3>DUPLA IGNORÂNCIA</h3>
-                <p>Pão de batata, 2 carne fraldinha, 2 queijo cheddar, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
-                <span className="price">R$ 31,00</span>
+
+              {/* Bebidas */}
+              <div className="card reveal menu-category">
+                <h3>Bebidas</h3>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">Goob 250ml</span>
+                    <span className="menu-item-price">R$ 2,50</span>
+                  </div>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">Refri 350ml</span>
+                    <span className="menu-item-price">R$ 5,00</span>
+                  </div>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">Refri 1L</span>
+                    <span className="menu-item-price">R$ 7,00</span>
+                  </div>
+                </div>
+                <div className="menu-item">
+                  <div className="menu-item-header">
+                    <span className="menu-item-name">Água 500ml</span>
+                    <span className="menu-item-price">R$ 2,00</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

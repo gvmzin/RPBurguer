@@ -2,6 +2,7 @@
   RPBurguer Design System 
   Theme: Dark Premium
 */
+@import './carousel.css';
 
 :root {
   --color-bg: #121212;
@@ -47,6 +48,7 @@ h1 {
   margin-bottom: 1.5rem;
   background: linear-gradient(to right, #fff, #aaa);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -282,6 +284,43 @@ nav {
   background-color: #ef4444;
 }
 
+/* Menu List */
+.menu-category h3 {
+  color: var(--color-primary);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.menu-item {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.menu-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.25rem;
+}
+
+.menu-item-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--color-text-main);
+}
+
+.menu-item-price {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.menu-item-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {
@@ -337,6 +376,7 @@ nav {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-left: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 150;
   }
 
   .nav-links.active {
