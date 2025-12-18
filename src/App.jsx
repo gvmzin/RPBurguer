@@ -1,19 +1,68 @@
 import { useState, useEffect } from 'react';
+import { MENU_ITEMS } from './data/menu';
+import { ANNOUNCEMENT } from './data/settings';
+import CartSidebar from './components/CartSidebar';
+import AnnouncementModal from './components/AnnouncementModal';
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
+
+  useEffect(() => {
+    if (ANNOUNCEMENT.active) {
+      // Pequeno delay para não parecer erro de renderização
+      const timer = setTimeout(() => setShowAnnouncement(true), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const addToCart = (item) => {
+    setCartItems(prev => {
+      const existing = prev.find(i => i.id === item.id);
+      if (existing) {
+        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const updateQuantity = (id, newQty) => {
+    if (newQty < 1) return;
+    setCartItems(prev => prev.map(item => item.id === id ? { ...item, quantity: newQty } : item));
+  };
+
+  const removeFromCart = (id) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+  };
 
 
 
 
 
+
+  // CONFIGURAÇÃO MANUAL DE STATUS
+  // Opções: 'open' (Forçar Aberto), 'closed' (Forçar Fechado), ou null (Automático/Horário)
+  const MANUAL_STATUS = null;
 
   // Status Check Logic
   useEffect(() => {
     const checkOpenStatus = () => {
-      // Create date object for Brazil time (UTC-3) without DST
+      // 1. Verificar Configuração Manual (Prioridade Total)
+      if (MANUAL_STATUS === 'open') {
+        setIsOpen(true);
+        return;
+      }
+      if (MANUAL_STATUS === 'closed') {
+        setIsOpen(false);
+        return;
+      }
+
+      // 2. Lógica Automática (Horário)
       const now = new Date();
       const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
       const brazilTime = new Date(utc + (3600000 * -3));
@@ -84,21 +133,37 @@ function App() {
               <a href="#contact" onClick={() => setIsMenuOpen(false)}>Contato</a>
             </div>
             <div className="nav-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div className="status-badge">
+              <div
+                className="status-badge"
+              >
                 <span className={`dot ${isOpen ? 'open' : 'closed'}`}></span>
                 <span className="status-text">
-                  {isOpen ? 'Aberto Agora' : (() => {
-                    const now = new Date();
-                    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                    const brazilTime = new Date(utc + (3600000 * -3));
-                    const day = brazilTime.getDay();
+                  {isOpen ? (MANUAL_STATUS === 'open' ? 'Aberto (Extra)' : 'Aberto Agora') : (
+                    MANUAL_STATUS === 'closed' ? 'Fechado (Temp.)' : (() => {
+                      const now = new Date();
+                      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                      const brazilTime = new Date(utc + (3600000 * -3));
+                      const day = brazilTime.getDay();
 
-                    if (day === 0) return 'Fechado (Abre Segunda)';
-                    if (day === 6) return 'Fechado (Abre às 17h)';
-                    return 'Fechado (Abre às 16h)';
-                  })()}
+                      if (day === 0) return 'Fechado (Abre Segunda)';
+                      if (day === 6) return 'Fechado (Abre às 17h)';
+                      return 'Fechado (Abre às 16h)';
+                    })())}
                 </span>
               </div>
+
+
+              <button className="cart-toggle" onClick={() => setIsCartOpen(true)} style={{ marginRight: '0.5rem' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                {cartItems.length > 0 && (
+                  <span className="cart-count">{cartItems.reduce((acc, item) => acc + item.quantity, 0)}</span>
+                )}
+              </button>
+
               <button
                 className="menu-toggle"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -112,8 +177,8 @@ function App() {
               </button>
             </div>
           </nav>
-        </div>
-      </header>
+        </div >
+      </header >
 
       <main>
         <section className="hero">
@@ -162,39 +227,48 @@ function App() {
             </div>
 
             <div className="grid">
-              <div className="card reveal">
-                <img src="/RP_CLASSICO.png" alt="RPCLASSICO" className="card-image" />
-                <h3>RPCLASSICO</h3>
-                <p>Pão de batata, carne fraldinha, queijo cheddar, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
-                <br />
-                <span className="price">R$ 18,00</span>
-              </div>
-              <div className="card reveal" style={{ position: 'relative', border: '1px solid var(--color-primary)' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '-12px',
-                  right: '20px',
-                  backgroundColor: 'var(--color-primary)',
-                  color: 'white',
-                  padding: '4px 12px',
-                  borderRadius: '12px',
-                  fontSize: '0.8rem',
-                  fontWeight: 'bold',
-                  boxShadow: '0 4px 10px rgba(255, 107, 53, 0.4)'
-                }}>
-                  Mais Pedido
+              {MENU_ITEMS.gourmet.map(item => (
+                <div className="card reveal" key={item.id} style={item.popular ? { position: 'relative', border: '1px solid var(--color-primary)' } : {}}>
+                  {item.popular && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '-12px',
+                      right: '20px',
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'white',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      fontWeight: 'bold',
+                      boxShadow: '0 4px 10px rgba(255, 107, 53, 0.4)'
+                    }}>
+                      Mais Pedido
+                    </div>
+                  )}
+                  <img src={item.image} alt={item.name} className="card-image" />
+                  <h3>{item.name}</h3>
+                  <p>{item.id === 'rp-burguer' || item.id === 'dupla-ignorancia' ? (
+                    item.id === 'rp-burguer' ? (
+                      <>Pão de batata, carne fraldinha, queijo cheddar, <span className="diff">cebola caramelizada</span>, <span className="diff">bacon</span>, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</>
+                    ) : (
+                      <>Pão de batata, <span className='diff'>2x carne fraldinha</span>, <span className='diff'>2x queijo cheddar</span>, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</>
+                    )
+                  ) : (
+                    item.description
+                  )}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
+                    <span className="price" style={{ margin: 0 }}>R$ {item.price.toFixed(2).replace('.', ',')}</span>
+                  </div>
+                  <button className="add-to-cart-btn" onClick={() => addToCart(item)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    Adicionar
+                  </button>
                 </div>
-                <img src="/PRBURGUER.png" alt="RPBURGER" className="card-image" />
-                <h3>RPBURGER</h3>
-                <p>Pão de batata, carne fraldinha, queijo cheddar, <span className="diff">cebola caramelizada</span>, <span className="diff">bacon</span>, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
-                <span className="price">R$ 22,00</span>
-              </div>
-              <div className="card reveal">
-                <img src="/DUPLAIGNORANCIA.png" alt="DUPLA IGNORÂNCIA" className="card-image" />
-                <h3>DUPLA IGNORÂNCIA</h3>
-                <p>Pão de batata, <span className='diff'>2x carne fraldinha</span>, <span className='diff'>2x queijo cheddar</span>, cebola caramelizada, bacon, molho cheddar, ketchup, maionese da casa, barbecue, alface, tomate.</p>
-                <span className="price">R$ 31,00</span>
-              </div>
+              ))}
             </div>
 
             <div className="section-header reveal" style={{ marginTop: '6rem' }}>
@@ -206,87 +280,63 @@ function App() {
               {/* Lanches */}
               <div className="card reveal menu-category">
                 <h3>Lanches Tradicionais</h3>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">MISTO</span>
-                    <span className="menu-item-price">R$ 6,00</span>
+                {MENU_ITEMS.tradicionais.map(item => (
+                  <div className="menu-item" key={item.id}>
+                    <div className="menu-item-header">
+                      <span className="menu-item-name">{item.name}</span>
+                      <span className="menu-item-price">R$ {item.price.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    {item.description && <p className="menu-item-desc">{item.description}</p>}
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={() => addToCart(item)}
+                      style={{ marginTop: '0.75rem', width: 'auto', padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+                    >
+                      Adicionar
+                    </button>
                   </div>
-                  <p className="menu-item-desc">Pão, queijo, presunto, ketchup, mostarda, maionese.</p>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">HAMBURGUER</span>
-                    <span className="menu-item-price">R$ 8,00</span>
-                  </div>
-                  <p className="menu-item-desc">Pão, carne de hambúrguer, alface, tomate, ketchup, mostarda, maionese.</p>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">MISBURGUER</span>
-                    <span className="menu-item-price">R$ 12,00</span>
-                  </div>
-                  <p className="menu-item-desc">Pão, carne de hambúrguer, queijo, presunto, alface, tomate, ketchup, mostarda, maionese.</p>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">MISBACON</span>
-                    <span className="menu-item-price">R$ 16,00</span>
-                  </div>
-                  <p className="menu-item-desc">Pão, carne de hambúrguer, queijo, presunto, bacon, alface, tomate, ketchup, mostarda, maionese.</p>
-                </div>
+                ))}
               </div>
 
               {/* Batata Frita */}
               <div className="card reveal menu-category">
                 <h3>Batata Frita</h3>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">Batata 100g</span>
-                    <span className="menu-item-price">R$ 7,00</span>
+                {MENU_ITEMS.batatas.map(item => (
+                  <div className="menu-item" key={item.id}>
+                    <div className="menu-item-header">
+                      <span className="menu-item-name">{item.name}</span>
+                      <span className="menu-item-price">R$ {item.price.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    {item.description && <p className="menu-item-desc">{item.description}</p>}
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={() => addToCart(item)}
+                      style={{ marginTop: '0.75rem', width: 'auto', padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+                    >
+                      Adicionar
+                    </button>
                   </div>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">Batata 200g</span>
-                    <span className="menu-item-price">R$ 10,00</span>
-                  </div>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">Batata 200g</span>
-                    <span className="menu-item-price">R$ 15,00</span>
-                  </div>
-                  <p className="menu-item-desc">Acompanhada de Cheddar & Bacon</p>
-                </div>
+                ))}
               </div>
 
               {/* Bebidas */}
               <div className="card reveal menu-category">
                 <h3>Bebidas</h3>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">Goob 250ml</span>
-                    <span className="menu-item-price">R$ 2,50</span>
+                {MENU_ITEMS.bebidas.map(item => (
+                  <div className="menu-item" key={item.id}>
+                    <div className="menu-item-header">
+                      <span className="menu-item-name">{item.name}</span>
+                      <span className="menu-item-price">R$ {item.price.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={() => addToCart(item)}
+                      style={{ marginTop: '0.75rem', width: 'auto', padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+                    >
+                      Adicionar
+                    </button>
                   </div>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">Refri 350ml</span>
-                    <span className="menu-item-price">R$ 5,00</span>
-                  </div>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">Refri 1L</span>
-                    <span className="menu-item-price">R$ 7,00</span>
-                  </div>
-                </div>
-                <div className="menu-item">
-                  <div className="menu-item-header">
-                    <span className="menu-item-name">Água 500ml</span>
-                    <span className="menu-item-price">R$ 2,00</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -393,42 +443,26 @@ function App() {
               Em frente ao condomínio Bosque da Lagoa, próximo ao Bora Bora
             </p>
           </div>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <a
-              href="https://www.instagram.com/rpburgeroficial/"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: 'var(--color-text-main)',
-                textDecoration: 'none',
-                padding: '0.75rem 1.5rem',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 'var(--radius-full)',
-                transition: 'var(--transition-fast)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-primary)';
-                e.currentTarget.style.color = 'var(--color-primary)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                e.currentTarget.style.color = 'var(--color-text-main)';
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-              </svg>
-              Siga @rpburgeroficial
-            </a>
-          </div>
-          <p>&copy; 2024 RPBurguer. Todos os direitos reservados.</p>
+
+          <p>&copy; 2025 <a href="https://github.com/gvmzin">gvmzin</a>. Todos os direitos reservados.</p>
         </footer>
       </main>
+
+      <CartSidebar
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cartItems={cartItems}
+        onUpdateQuantity={updateQuantity}
+        onRemoveItem={removeFromCart}
+      />
+
+      {showAnnouncement && (
+        <AnnouncementModal
+          title={ANNOUNCEMENT.title}
+          message={ANNOUNCEMENT.message}
+          onClose={() => setShowAnnouncement(false)}
+        />
+      )}
     </>
   )
 }
