@@ -138,8 +138,8 @@ function App() {
               >
                 <span className={`dot ${isOpen ? 'open' : 'closed'}`}></span>
                 <span className="status-text">
-                  {isOpen ? (MANUAL_STATUS === 'open' ? 'Aberto (Extra)' : 'Aberto Agora') : (
-                    MANUAL_STATUS === 'closed' ? 'Fechado (Temp.)' : (() => {
+                  {isOpen ? (MANUAL_STATUS === 'open' ? 'Aberto' : 'Aberto') : (
+                    MANUAL_STATUS === 'closed' ? 'Fechado' : (() => {
                       const now = new Date();
                       const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
                       const brazilTime = new Date(utc + (3600000 * -3));
